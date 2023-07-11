@@ -88,6 +88,7 @@ class ProgramConversionContext:
         self.return_variable = None
         self._qubits_seen = set()
         self._var_idx = 0
+        self._in_main = False
 
     def make_program(self) -> Program:
         """Makes a Program object using the oqpy program from this conversion context.
@@ -106,6 +107,10 @@ class ProgramConversionContext:
         """
         # Can be memoized or otherwise made more performant
         return sorted(list(self._qubits_seen))
+
+    def in_main(self, in_main: bool) -> None:
+        """Set context for processing the `main` block."""
+        self._in_main = in_main
 
     def register_qubit(self, qubit: int) -> None:
         """Register a virtual qubit to use in this program."""
