@@ -21,6 +21,29 @@ import pytest
 import braket.experimental.autoqasm as aq
 from braket.experimental.autoqasm.types.types import qasm_range
 
+# Demo test case!
+
+
+def test_demo():
+    @aq.function
+    def ret_test() -> List[int]:
+        res = aq.ArrayVar([1, 2, 3], dimensions=[3])
+        return res
+
+    @aq.function
+    def main() -> List[int]:
+        return ret_test()
+
+    expected = """OPENQASM 3.0;
+def ret_test() -> array[int[32], 3] {
+    array[int[32], 3] res = {1, 2, 3};
+    return res;
+}
+array[int[32], 3] __arr_0__ = {};
+__arr_0__ = ret_test();"""
+
+    assert main().to_ir() == expected.strip()
+
 
 @pytest.mark.parametrize(
     "range_params, expected_range_params",
@@ -170,29 +193,6 @@ def test_return_none():
         return None
 
     ret_test().to_ir()
-
-
-def test_return_array():
-    """Test return type discovery of array values."""
-
-    @aq.function
-    def ret_test() -> List[int]:
-        res = aq.ArrayVar([1, 2, 3], dimensions=[3])
-        return res
-
-    @aq.function
-    def main() -> List[int]:
-        return ret_test()
-
-    expected = """OPENQASM 3.0;
-def ret_test() -> array[int[32], 3] {
-    array[int[32], 3] res = {1, 2, 3};
-    return res;
-}
-array[int[32], 3] __arr_0__ = {};
-__arr_0__ = ret_test();"""
-
-    assert main().to_ir() == expected
 
 
 def test_return_func_call():

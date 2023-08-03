@@ -333,7 +333,6 @@ def _make_return_instance(
         return_instance = return_type(name=program_conversion_context.next_var_name(return_type))
     elif return_type:
         if hasattr(return_type, "__origin__"):
-            # Types from python's typing module, such as `List`. origin gives us `list``
             return_instance = return_type.__origin__()
         else:
             return_instance = return_type()
