@@ -207,7 +207,7 @@ def test_return_python_array():
     """Test returning a python array."""
 
     @aq.function
-    def tester(arr: list[int]) -> list[int]:
+    def tester(arr: List[int]) -> List[int]:
         return [1, 2, 3]
 
     @aq.function(num_qubits=4)
@@ -549,7 +549,7 @@ def test_ignore_ret_typehint_bool():
     """Test type discovery of boolean return values."""
 
     @aq.function
-    def ret_test() -> list[int]:
+    def ret_test() -> List[int]:
         return True
 
     @aq.function
@@ -596,7 +596,7 @@ def test_param_array_list_missing_arg():
     """Test list parameter with missing type arg (list rather than list[int])."""
 
     @aq.function
-    def param_test(arr: list) -> int:
+    def param_test(arr: List) -> int:
         return 1
 
     @aq.function(num_qubits=4)
