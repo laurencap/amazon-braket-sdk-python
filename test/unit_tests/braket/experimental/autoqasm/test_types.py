@@ -653,3 +653,24 @@ def test_param_array_list_missing_arg():
 
     with pytest.raises(aq.errors.ParameterTypeError):
         main()
+
+
+def test_recursive_no_ret_type():
+    """TODO"""
+    @aq.function
+    def recurse() -> None:
+        recurse()
+        return 1
+
+    expected = """OPENQASM 3.0;
+def ret_test() -> float[64] {
+    float[64] retval_;
+    retval_ = 1.2;
+    return retval_;
+}
+qubit[4] __qubits__;
+float[64] __float_1__;
+__float_1__ = ret_test();"""
+
+    assert recurse().to_ir() == expected
+

@@ -280,6 +280,7 @@ def _convert_program_as_subroutine(
         subroutine_function_call = oqpy_sub(oqpy_program, *args, **kwargs)
 
         # Mark that we are finished processing this function
+        # TODO: _dummy needs updating if it was used recursively
         program_conversion_context.subroutines_processing.remove(f)
     else:
         # Convert the function via autograph into an oqpy subroutine
@@ -426,7 +427,7 @@ def _wrap_for_oqpy_subroutine(f: Callable, options: converter.ConversionOptions)
     def _func(*args, **kwargs) -> Any:
         inner_program: oqpy.Program = args[0]
         with aq_program.get_program_conversion_context().push_oqpy_program(inner_program):
-            result = aq_transpiler.converted_call(f, args[1:], kwargs, options=options)
+            result = aq_transpiler.converted_call(f, args[1:], kwargs, options=options)  # This is what initializes the ret val
         inner_program.autodeclare()
         return result
 
