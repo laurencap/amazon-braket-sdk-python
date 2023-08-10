@@ -179,7 +179,7 @@ def test_return_none():
     assert ret_test().to_ir() == expected
 
 
-def test_return_array():
+def test_return_array_int():
     """Test return type discovery of array values."""
 
     @aq.function
@@ -204,7 +204,7 @@ __arr_1__ = ret_test();"""
 
 
 def test_return_python_array():
-    """Test returning a python array."""
+    """Test returning a python array of ints."""
 
     @aq.function
     def tester(arr: List[int]) -> List[int]:
@@ -224,6 +224,84 @@ array[int[32], 10] __arr_1__ = {};
 qubit[4] __qubits__;
 __arr_1__ = tester();"""
     assert main().to_ir() == expected
+
+
+def test_return_python_array_float():
+    """Test returning a python array of floats."""
+
+    @aq.function
+    def tester(arr: List[float]) -> List[float]:
+        return [1.3, 2.2, 3.1]
+
+    @aq.function(num_qubits=4)
+    def main():
+        tester([1.2])
+
+    # TODO
+
+    expected = """OPENQASM 3.0;
+def tester(array[float[64], 10] arr) -> array[float[64], 10] {
+    array[float[64], 10] retval_;
+    retval_ = {1.3, 2.2, 3.1};
+    return retval_;
+}
+array[float[64], 10] __arr_1__ = {};
+qubit[4] __qubits__;
+__arr_1__ = tester({1.2});"""
+    assert main().to_ir() == expected
+
+
+def test_return_array_bool():
+    """Test returning a python array of booleans."""
+
+    @aq.function
+    def tester(arr: List[bool]) -> List[bool]:
+        return [True, True, True, False]
+
+    @aq.function(num_qubits=4)
+    def main():
+        tester([True])
+
+    expected = """OPENQASM 3.0;
+def tester(array[bool, 10] arr) -> array[bool, 10] {
+    array[bool, 10] retval_;
+    retval_ = {true, true, true, false};
+    return retval_;
+}
+array[bool, 10] __arr_1__ = {};
+qubit[4] __qubits__;
+__arr_1__ = tester({true});"""
+    assert main().to_ir() == expected
+
+
+def test_array_of_array():
+    """Test returning a nested python array."""
+
+    @aq.function
+    def tester(arr: List[List[int]]) -> List[List[int]]:
+        return [[1], [1, 2], [3, 4]]
+
+    @aq.function(num_qubits=4)
+    def main():
+        tester()
+
+    with pytest.raises(aq.errors.ParameterTypeError):
+        assert main()
+
+
+def test_return_array_unsupported():
+    """Test unsupported array type."""
+
+    @aq.function
+    def tester(arr: List[str]) -> List[str]:
+        return ["test", "test"]
+
+    @aq.function(num_qubits=4)
+    def main():
+        tester()
+
+    with pytest.raises(aq.errors.ParameterTypeError):
+        assert main()
 
 
 def test_return_func_call():
