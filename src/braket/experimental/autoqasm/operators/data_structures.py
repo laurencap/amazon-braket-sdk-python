@@ -14,14 +14,14 @@
 
 """Operators for other data structures (e.g. list)."""
 
-from typing import Iterable, Optional
+from typing import Iterable
 
 
-def new_list(iterable: Optional[Iterable] = None) -> list:
+def new_list(iterable: Iterable | None = None) -> list:
     """The list constructor
 
     Args:
-        iterable (Optional[Iterable]): Optional elements to fill the list with. Defaults to None.
+        iterable (Iterable | None): Optional elements to fill the list with. Defaults to None.
 
     Returns:
         list: A list-like object. The exact return value depends on the initial elements.

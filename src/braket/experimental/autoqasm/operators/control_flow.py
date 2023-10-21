@@ -14,7 +14,7 @@
 
 """Operators for control flow constructs (e.g. if, for, while)."""
 
-from typing import Any, Callable, Iterable, Optional, Union
+from typing import Any, Callable, Iterable
 
 import oqpy.base
 
@@ -23,8 +23,8 @@ from braket.experimental.autoqasm.types import is_qasm_type
 
 
 def for_stmt(
-    iter: Union[Iterable, oqpy.Range],
-    extra_test: Optional[Callable[[], Any]],
+    iter: Iterable | oqpy.Range,
+    extra_test: Callable[[], Any] | None,
     body: Callable[[Any], None],
     get_state: Any,
     set_state: Any,
@@ -34,8 +34,8 @@ def for_stmt(
     """Implements a for loop.
 
     Args:
-        iter (Union[Iterable, Range]): The iterable to be looped over.
-        extra_test (Optional[Callable[[], Any]]): A function to cause the loop to break if true.
+        iter (Iterable | Range): The iterable to be looped over.
+        extra_test (Callable[[], Any] | None): A function to cause the loop to break if true.
         body (Callable[[Any],]): The body of the for loop.
         get_state (Any): Unused.
         set_state (Any): Unused.

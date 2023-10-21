@@ -17,7 +17,7 @@ import copy
 import functools
 import inspect
 from types import FunctionType
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable
 
 import openqasm3.ast as qasm_ast
 import oqpy.base
@@ -43,8 +43,8 @@ from braket.experimental.autoqasm.program.gate_calibrations import GateCalibrati
 
 def main(
     *args,
-    num_qubits: Optional[int] = None,
-    device: Optional[Union[Device, str]] = None,
+    num_qubits: int | None = None,
+    device: Device | str | None = None,
 ) -> Callable[[Any], aq_program.Program]:
     """Decorator that converts a function into a callable that returns
     a Program object containing the quantum program.
@@ -53,9 +53,9 @@ def main(
     function is called, and a new Program object is returned each time.
 
     Args:
-        num_qubits (Optional[int]): Configuration to set the total number of qubits to declare in
+        num_qubits (int | None): Configuration to set the total number of qubits to declare in
             the program.
-        device (Optional[Union[Device, str]]): Configuration to set the target device for the
+        device (Device | str | None): Configuration to set the target device for the
             program. Can be either an Device object or a valid Amazon Braket device ARN.
 
     Returns:
@@ -120,15 +120,15 @@ def gate_calibration(*args, implements: Callable, **kwargs) -> Callable[[], Gate
 
 
 def _function_wrapper(
-    *args: Tuple[Any],
+    *args: tuple[Any],
     converter_callback: Callable,
-    converter_args: Optional[Dict[str, Any]] = None,
+    converter_args: dict[str, Any] | None = None,
 ) -> Callable[[Any], aq_program.Program]:
     """Wrapping and conversion logic around the user function `f`.
 
     Args:
         converter_callback (Callable): The function converter, e.g., _convert_main.
-        converter_args (Optional[Dict[str, Any]]): Extra arguments for the function converter.
+        converter_args (dict[str, Any] | None): Extra arguments for the function converter.
 
     Returns:
         Callable[[Any], Program]: A callable which returns the converted
@@ -167,7 +167,7 @@ def _function_wrapper(
     return autograph_artifact(decorated_wrapper)
 
 
-def _autograph_optional_features() -> Tuple[converter.Feature]:
+def _autograph_optional_features() -> tuple[converter.Feature]:
     # Exclude autograph features which are TensorFlow-specific
     return converter.Feature.all_but(
         (converter.Feature.NAME_SCOPES, converter.Feature.AUTO_CONTROL_DEPS)
@@ -177,8 +177,8 @@ def _autograph_optional_features() -> Tuple[converter.Feature]:
 def _convert_main(
     f: Callable,
     options: converter.ConversionOptions,
-    args: List[Any],
-    kwargs: Dict[str, Any],
+    args: list[Any],
+    kwargs: dict[str, Any],
     user_config: aq_program.UserConfig,
 ) -> None:
     """Convert the initial callable `f` into a full AutoQASM program `program`.
@@ -191,8 +191,8 @@ def _convert_main(
     Args:
         f (Callable): The function to be converted.
         options (converter.ConversionOptions): Converter options.
-        args (List[Any]): Arguments passed to the program when called.
-        kwargs (Dict[str, Any]): Keyword arguments passed to the program when called.
+        args (list[Any]): Arguments passed to the program when called.
+        kwargs (dict[str, Any]): Keyword arguments passed to the program when called.
         user_config (UserConfig): User-specified settings that influence program building.
     """
     if aq_program.in_active_program_conversion_context():
@@ -260,8 +260,8 @@ def _add_qubit_declaration(program_conversion_context: aq_program.ProgramConvers
 def _convert_subroutine(
     f: Callable,
     options: converter.ConversionOptions,
-    args: List[Any],
-    kwargs: Dict[str, Any],
+    args: list[Any],
+    kwargs: dict[str, Any],
 ) -> None:
     """Convert the initial callable `f` into a full AutoQASM program `program`.
     The contents of `f` are converted into a subroutine in the program.
@@ -272,8 +272,8 @@ def _convert_subroutine(
     Args:
         f (Callable): The function to be converted.
         options (converter.ConversionOptions): Converter options.
-        args (List[Any]): Arguments passed to the program when called.
-        kwargs (Dict[str, Any]): Keyword arguments passed to the program when called.
+        args (list[Any]): Arguments passed to the program when called.
+        kwargs (dict[str, Any]): Keyword arguments passed to the program when called.
     """
     if not aq_program.in_active_program_conversion_context():
         raise errors.AutoQasmTypeError(
@@ -432,7 +432,7 @@ def _make_return_instance_from_f_annotation(f: Callable) -> Any:
         return_instance = return_type()
     elif return_type:
         if hasattr(return_type, "__origin__"):
-            # Types from python's typing module, such as `List`. origin gives us `list``
+            # Types from python's typing module, such as `list`. origin gives us `list``
             return_instance = return_type.__origin__()
         else:
             return_instance = return_type()
@@ -452,7 +452,7 @@ def _make_return_instance_from_oqpy_return_type(return_type: Any) -> Any:
     return var_type()
 
 
-def _get_bitvar_size(node: qasm_ast.BitType) -> Optional[int]:
+def _get_bitvar_size(node: qasm_ast.BitType) -> int | None:
     if not isinstance(node, qasm_ast.BitType) or not node.size:
         return None
     return node.size.value
@@ -461,8 +461,8 @@ def _get_bitvar_size(node: qasm_ast.BitType) -> Optional[int]:
 def _convert_gate(
     f: Callable,
     options: converter.ConversionOptions,
-    args: List[Any],
-    kwargs: Dict[str, Any],
+    args: list[Any],
+    kwargs: dict[str, Any],
 ) -> Callable:
     # We must be inside an active conversion context in order to invoke a gate
     program_conversion_context = aq_program.get_program_conversion_context()
@@ -558,8 +558,8 @@ def _get_gate_args(f: Callable) -> aq_program.GateArgs:
 def _convert_calibration(
     f: Callable,
     options: converter.ConversionOptions,
-    args: List[Any],
-    kwargs: Dict[str, Any],
+    args: list[Any],
+    kwargs: dict[str, Any],
     gate_function: Callable,
     **decorator_kwargs,
 ) -> GateCalibration:
@@ -569,8 +569,8 @@ def _convert_calibration(
     Args:
         f (Callable): The function to be converted.
         options (converter.ConversionOptions): Converter options.
-        args (List[Any]): Arguments passed to the program when called.
-        kwargs (Dict[str, Any]): Keyword arguments passed to the program when called.
+        args (list[Any]): Arguments passed to the program when called.
+        kwargs (dict[str, Any]): Keyword arguments passed to the program when called.
         gate_function (Callable): The gate function which calibration is being defined.
 
     Returns:
@@ -624,14 +624,14 @@ def _convert_calibration(
 
 def _validate_calibration_args(
     gate_function: Callable,
-    decorator_args: Dict[str, Union[Qubit, float]],
+    decorator_args: dict[str, Qubit | float],
     func_args: aq_program.GateArgs,
 ) -> None:
     """Validate the arguments passed to the calibration decorator and function.
 
     Args:
         gate_function (Callable): The gate function which calibration is being defined.
-        decorator_args (Dict[str, Union[Qubit, float]]): The calibration decorator arguments.
+        decorator_args (dict[str, Qubit | float]): The calibration decorator arguments.
         func_args (aq_program.GateArgs): The gate function arguments.
     """
     gate_args = _get_gate_args(gate_function)

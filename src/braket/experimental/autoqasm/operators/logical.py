@@ -14,13 +14,13 @@
 
 """Operators for logical boolean operators (e.g. not, and, or)."""
 
-from typing import Any, Union
+from typing import Any
 
 from braket.experimental.autoqasm import program
 from braket.experimental.autoqasm import types as aq_types
 
 
-def eq(a: Any, b: Any) -> Union[bool, aq_types.BoolVar]:
+def eq(a: Any, b: Any) -> bool | aq_types.BoolVar:
     """Functional form of "equal".
 
     Args:
@@ -28,7 +28,7 @@ def eq(a: Any, b: Any) -> Union[bool, aq_types.BoolVar]:
         b (Any): Second expression to compare.
 
     Returns:
-        Union[bool, BoolVar]: Whether the expressions are equal.
+        bool | BoolVar: Whether the expressions are equal.
     """
     if aq_types.is_qasm_type(a) or aq_types.is_qasm_type(b):
         return _oqpy_eq(a, b)

@@ -16,14 +16,14 @@
 
 import re
 from functools import singledispatch
-from typing import Any, List, Union
+from typing import Any
 
 import oqpy.base
 from openpulse.printer import dumps
 
 from braket.experimental.autoqasm import constants, errors, program
 
-QubitIdentifierType = Union[int, oqpy._ClassicalVar, oqpy.base.OQPyExpression, str, oqpy.Qubit]
+QubitIdentifierType = int | oqpy._ClassicalVar | oqpy.base.OQPyExpression | str | oqpy.Qubit
 
 
 def is_qubit_identifier_type(qubit: Any) -> bool:
@@ -38,14 +38,14 @@ def is_qubit_identifier_type(qubit: Any) -> bool:
     return isinstance(qubit, QubitIdentifierType.__args__)
 
 
-def _get_physical_qubit_indices(qids: List[str]) -> List[int]:
+def _get_physical_qubit_indices(qids: list[str]) -> list[int]:
     """Convert physical qubit labels to the corresponding qubit indices.
 
     Args:
-        qids (List[str]): Physical qubit labels.
+        qids (list[str]): Physical qubit labels.
 
     Returns:
-        List[int]: Qubit indices corresponding to the input physical qubits.
+        list[int]: Qubit indices corresponding to the input physical qubits.
     """
     braket_qubits = []
     for qid in qids:
@@ -58,7 +58,7 @@ def _get_physical_qubit_indices(qids: List[str]) -> List[int]:
     return braket_qubits
 
 
-def _global_qubit_register(qubit_idx_expr: Union[int, str]) -> str:
+def _global_qubit_register(qubit_idx_expr: int | str) -> str:
     # TODO: We should index into a oqpy.Qubit register rather
     # than manually generating the string to index into
     # a hard-coded global qubit register.

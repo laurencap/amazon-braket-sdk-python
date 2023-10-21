@@ -14,7 +14,7 @@
 
 """Operators for conditional expressions (e.g. the ternary if statement)."""
 
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 import oqpy.base
 
@@ -24,7 +24,7 @@ from braket.experimental.autoqasm.errors import UnsupportedConditionalExpression
 
 
 def if_exp(
-    cond: Any, if_true: Callable[[], Any], if_false: Callable[[], Any], expr_repr: Optional[str]
+    cond: Any, if_true: Callable[[], Any], if_false: Callable[[], Any], expr_repr: str | None
 ) -> Any:
     """Implements a conditional if expression.
 
@@ -32,7 +32,7 @@ def if_exp(
         cond (Any): The condition of the if clause.
         if_true (Callable[[], Any]): The function to run if the condition is true.
         if_false (Callable[[], Any]): The function to run if the condition is false.
-        expr_repr (Optional[str]): The conditional expression represented as a string.
+        expr_repr (str | None): The conditional expression represented as a string.
 
     Returns:
         Any: The value returned from the conditional expression.
@@ -47,8 +47,8 @@ def _oqpy_if_exp(
     cond: Any,
     if_true: Callable[[None], Any],
     if_false: Callable[[None], Any],
-    expr_repr: Optional[str],
-) -> Optional[oqpy.base.Var]:
+    expr_repr: str | None,
+) -> oqpy.base.Var | None:
     """Overload of if_exp that stages an oqpy conditional."""
     result_var = None
     oqpy_program = aq_program.get_program_conversion_context().get_oqpy_program()

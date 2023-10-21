@@ -13,8 +13,6 @@
 
 """Mock transpiler for testing converters."""
 
-from typing import List, Union
-
 import gast
 
 from braket.experimental.autoqasm.autograph.core import ag_ctx
@@ -24,11 +22,11 @@ from braket.experimental.autoqasm.transpiler import PyToOqpy
 
 
 class MockTranspiler(PyToOqpy):
-    def __init__(self, converters: List):
+    def __init__(self, converters: list):
         """A custom transpiler based on `transpiler.PyToOqpy` for unit testing
         converters.
         Args:
-            converters (List): List of converters to test.
+            converters (list): List of converters to test.
         """
         super(MockTranspiler, self).__init__()
         if isinstance(converters, (list, tuple)):
@@ -37,16 +35,16 @@ class MockTranspiler(PyToOqpy):
             self._converters = (converters,)
 
     def transform_ast(
-        self, node: Union[gast.Lambda, gast.FunctionDef], ctx: ag_ctx.ControlStatusCtx
-    ) -> Union[gast.Lambda, gast.FunctionDef]:
+        self, node: gast.Lambda | gast.FunctionDef, ctx: ag_ctx.ControlStatusCtx
+    ) -> gast.Lambda | gast.FunctionDef:
         """Transform AST from a node using the provided converters.
         Args:
-            node (Union[Lambda, FunctionDef]): One or more ast.AST nodes
+            node (Lambda | FunctionDef): One or more ast.AST nodes
                 representing the AST to be transformed.
             ctx (ControlStatusCtx): transformer context.
 
         Returns:
-            Union[Lambda, FunctionDef]: The root of the transformed AST.
+            Lambda | FunctionDef: The root of the transformed AST.
         """
         node = self._initial_analysis(node, ctx)
 

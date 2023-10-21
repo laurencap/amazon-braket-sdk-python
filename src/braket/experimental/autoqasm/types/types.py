@@ -13,7 +13,7 @@
 
 """AutoQASM types and type utilities."""
 
-from typing import Any, Optional
+from typing import Any
 
 import oqpy
 import oqpy.base
@@ -32,6 +32,7 @@ def is_qasm_type(val: Any) -> bool:
     Returns:
         bool: Whether the object is a QASM type.
     """
+    # laurecap TODO
     try:
         if issubclass(val, (oqpy.Range, oqpy._ClassicalVar, oqpy.base.OQPyExpression)):
             return True
@@ -42,13 +43,13 @@ def is_qasm_type(val: Any) -> bool:
     return isinstance(val, (oqpy.Range, oqpy._ClassicalVar, oqpy.base.OQPyExpression))
 
 
-def qasm_range(start: int, stop: Optional[int] = None, step: Optional[int] = 1) -> oqpy.Range:
+def qasm_range(start: int, stop: int | None = None, step: int | None = 1) -> oqpy.Range:
     """Range definition.
 
     Args:
         start (int): Start of the range
-        stop (Optional[int]): End of the range. Defaults to None.
-        step (Optional[int]): Step of the range. Defaults to 1.
+        stop (int | None): End of the range. Defaults to None.
+        step (int | None): Step of the range. Defaults to 1.
 
     Returns:
         oqpy.Range: oqpy range definition.

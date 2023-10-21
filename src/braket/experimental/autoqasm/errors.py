@@ -14,9 +14,6 @@
 """Errors raised in the AutoQASM build process."""
 
 
-from typing import Optional
-
-
 class AutoQasmError(Exception):
     """Base class for all AutoQASM exceptions."""
 
@@ -86,7 +83,7 @@ class InsufficientQubitCountError(AutoQasmError):
 class UnsupportedConditionalExpressionError(AutoQasmError):
     """Conditional expressions which return values are not supported."""
 
-    def __init__(self, true_type: Optional[type], false_type: Optional[type]):
+    def __init__(self, true_type: type | None, false_type: type | None):
         if_type = true_type.__name__ if true_type else "None"
         else_type = false_type.__name__ if false_type else "None"
         self.message = """\
