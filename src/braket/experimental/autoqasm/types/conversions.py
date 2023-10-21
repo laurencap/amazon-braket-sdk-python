@@ -34,17 +34,16 @@ def map_type(python_type: type) -> type:
     Returns:
         type: The corresponding oqpy type.
     """
-    origin_type = typing.get_origin(python_type) or python_type
     type_args = typing.get_args(python_type)
 
-    # TODO
-    if issubclass(origin_type, bool):
+    # TODO laurecap
+    if isinstance(python_type, bool):
         return oqpy.BoolVar
-    if issubclass(origin_type, (int, np.integer)):
+    if isinstance(python_type, (int, np.integer)):
         return oqpy.IntVar
-    if issubclass(origin_type, (float, np.floating)):
+    if isinstance(python_type, (float, np.floating)):
         return oqpy.FloatVar
-    if issubclass(origin_type, list):
+    if isinstance(python_type, list):
         if not type_args:
             raise errors.ParameterTypeError("Please supply a type argument to list.")
 
@@ -63,7 +62,7 @@ def map_type(python_type: type) -> type:
         # ctx = program.get_program_conversion_context()
         # dims = ctx.get_oqpy_program().declared_vars[name_of_var].dimensions
         return oqpy.ArrayVar[oqpy.IntVar, 10]
-    if issubclass(origin_type, tuple):
+    if isinstance(python_type, tuple):
         raise TypeError(
             "Tuples are not supported as parameters to AutoQASM functions; "
             "please separate the tuple into multiple parameters or use a list instead."

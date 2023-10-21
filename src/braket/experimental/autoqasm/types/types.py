@@ -32,7 +32,7 @@ def is_qasm_type(val: Any) -> bool:
     Returns:
         bool: Whether the object is a QASM type.
     """
-    # laurecap TODO
+    # TODO laurecap
     try:
         if issubclass(val, (oqpy.Range, oqpy._ClassicalVar, oqpy.base.OQPyExpression)):
             return True
