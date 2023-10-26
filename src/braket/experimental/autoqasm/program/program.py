@@ -23,6 +23,7 @@ from typing import Any, Optional, Union
 
 import oqpy.base
 
+import braket.experimental.autoqasm.types as aq_types
 from braket.circuits.serialization import IRType, SerializableProgram
 from braket.device_schema import DeviceActionType
 from braket.devices.device import Device
@@ -281,7 +282,7 @@ class ProgramConversionContext:
                     f"block. The native gates of the device are: {native_gates}"
                 )
 
-    def register_parameter(self, name: str) -> None:
+    def register_parameter(self, name: str, type: type = float) -> None:
         """Register an input parameter with the given name, if it has not already been
         registered. Only floats are currently supported.
 
@@ -289,7 +290,8 @@ class ProgramConversionContext:
             name (str): The identifier for the parameter.
         """
         if name not in self._free_parameters:
-            self._free_parameters[name] = oqpy.FloatVar("input", name=name)
+            type_ = aq_types.map_type(type)
+            self._free_parameters[name] = type_("input", name=name)
 
     def get_free_parameters(self) -> list[oqpy.FloatVar]:
         """Return a list of named oqpy.Vars that are used as free parameters in the program."""

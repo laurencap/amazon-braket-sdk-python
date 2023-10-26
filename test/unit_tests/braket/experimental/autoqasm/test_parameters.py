@@ -11,13 +11,16 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-"""AutoQASM tests for FreeParameter support."""
+"""AutoQASM tests for parameter support: FreeParameter and AutoQASM TypedParameter."""
+
+import pytest
 
 import braket.experimental.autoqasm as aq
 from braket.circuits import FreeParameter
 from braket.default_simulator import StateVectorSimulator
 from braket.devices.local_simulator import LocalSimulator
 from braket.experimental.autoqasm.instructions import cnot, cphaseshift, gpi, h, measure, ms, rx, rz
+from braket.experimental.autoqasm.parameters import TypedParameter
 from braket.tasks.local_quantum_task import LocalQuantumTask
 
 
@@ -63,6 +66,29 @@ def multi_parametric():
 
 def test_multiple_parameters():
     """Test that multiple free parameters all appear in the processed program."""
+
+    expected = """OPENQASM 3.0;
+bit[2] c;
+input float[64] alpha;
+input float[64] theta;
+qubit[2] __qubits__;
+rx(alpha) __qubits__[0];
+rx(theta) __qubits__[1];
+bit[2] __bit_0__ = "00";
+__bit_0__[0] = measure __qubits__[0];
+__bit_0__[1] = measure __qubits__[1];
+c = __bit_0__;"""
+    assert multi_parametric().to_ir() == expected
+
+
+def test_typed_parameters():
+    """Test that multiple free parameters all appear in the processed program."""
+
+    @aq.main
+    def multi_parametric():
+        rx(0, TypedParameter("alpha"))
+        rx(1, TypedParameter("theta", float))
+        c = measure([0, 1])  # noqa: F841
 
     expected = """OPENQASM 3.0;
 bit[2] c;
@@ -213,7 +239,6 @@ silly_ms(3, 0.5, beta);"""
 
 
 def test_sim_subroutine_arg():
-    # FIXME
     @aq.subroutine
     def rx_theta(theta: float):
         rx(0, theta)
@@ -222,6 +247,7 @@ def test_sim_subroutine_arg():
     def parametric():
         rx_theta(FreeParameter("theta"))
 
+    # TODO
     measurements = _test_parametric_on_local_sim(parametric(), {"theta": 3.14})
     assert 0 not in measurements["__bit_0__"]
 
@@ -266,8 +292,22 @@ def test_integer_parameters():
     """Test integer input parameter type."""
 
     @aq.main
+    def parametric():
+        rx(0, TypedParameter("my_int", int))
+
+    expected = """OPENQASM 3.0;
+input int[32] my_int;
+qubit[1] __qubits__;
+rx(my_int) __qubits__[0];"""
+    assert parametric().to_ir() == expected
+
+
+def test_conditions_with_parameters():
+    """Test that parameters can be used in predicates."""
+
+    @aq.main
     def parametric(qubit: int):
-        basis = FreeParameter("basis")
+        basis = TypedParameter("basis", int)
         if basis == 0:
             h(qubit)
         elif basis == 1:
@@ -292,5 +332,28 @@ result = __bit_0__;"""
     assert parametric(1).to_ir() == expected
 
 
-# TODO: local sim doesn't seem to support angle input types?
-# TODO: gate args?
+def test_invalid_typed_parameter():
+    """Test that nonvalid parameters raise a ValueError."""
+    with pytest.raises(ValueError):
+        TypedParameter("bad_type", bool)
+
+
+def test_aq_typed_parameter():
+    """Test TypedParameter with AutoQASM types."""
+
+    @aq.main
+    def parametric():
+        rx(0, TypedParameter("float_0", aq.FloatVar))
+        rx(1, TypedParameter("int_1", aq.IntVar))
+
+    # TODO
+    expected = """OPENQASM 3.0;
+input float[64] float_0;
+input int[32] int_1;
+qubit[2] __qubits__;
+rx(float_0) __qubits__[0];
+rx(int_1) __qubits__[1];"""
+    assert parametric().to_ir() == expected
+
+
+# TODO: test gate args
