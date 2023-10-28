@@ -13,6 +13,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from functools import singledispatchmethod
 from itertools import repeat
 from multiprocessing import Pool
@@ -245,6 +246,17 @@ class LocalSimulator(Device):
         *args,
         **kwargs,
     ) -> Union[GateModelQuantumTaskResult, AnnealingQuantumTaskResult]:
+        if isinstance(task_specification, Callable):
+            import inspect
+            from braket.circuits.free_parameter import FreeParameter
+            assert "inputs" in kwargs, "Callable program is expecting inputs."
+            n_params = len(inspect.signature(task_specification).parameters)
+            params = [FreeParameter(param_name) for param_name in kwargs["inputs"].keys()]
+            assert len(params) == n_params, f"Program expected values for {n_params} input parameters."
+            # TODO: the ordering of parameters matters. Should force the parameter names to
+            # match the Program parameter names, and then follow that ordering.
+            task_specification = task_specification(*params)
+            return self._run_internal(task_specification, shots, *args, **kwargs)
         raise NotImplementedError(f"Unsupported task type {type(task_specification)}")
 
     @_run_internal.register
