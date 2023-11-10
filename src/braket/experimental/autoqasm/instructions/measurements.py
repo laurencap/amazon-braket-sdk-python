@@ -50,7 +50,6 @@ def measure(qubits: Union[QubitIdentifierType, Iterable[QubitIdentifierType]]) -
     bit_var_size = len(qubits) if len(qubits) > 1 else None
     bit_var = aq_types.BitVar(
         size=bit_var_size,
-        needs_declaration=True,
     )
     oqpy_program.declare(bit_var)
 
