@@ -44,13 +44,16 @@ def assign_stmt(target_name: str, value: Any) -> Any:
     if isinstance(value, UndefinedReturnValue):
         return value
 
-    program_conversion_context = program.get_program_conversion_context()
-    is_target_name_used = program_conversion_context.is_var_name_used(target_name)
+    aq_context = program.get_program_conversion_context()
+    is_target_name_used = aq_context.is_var_name_used(target_name)
     is_value_name_used = isinstance(
         value, oqpy.base.Var
-    ) and program_conversion_context.is_var_name_used(value.name)
+    ) and aq_context.is_var_name_used(value.name)
 
     if target_name == constants.RETVAL_VARIABLE_NAME:
+        if not aq_context.subroutines_processing:
+            aq_context.register_parameter(value.name, float, "output")
+
         # AutoGraph transpiles return statements like
         #    return <return_value>
         # into
@@ -64,7 +67,7 @@ def assign_stmt(target_name: str, value: Any) -> Any:
             # Return it directly without wrapping it or declaring a new variable.
             return value
 
-        if program_conversion_context.subroutines_processing and isinstance(value, list):
+        if aq_context.subroutines_processing and isinstance(value, list):
             raise errors.UnsupportedSubroutineReturnType(
                 "Subroutine returns an array or list, which is not allowed."
             )
@@ -82,7 +85,7 @@ def assign_stmt(target_name: str, value: Any) -> Any:
         target.init_expression = None
         target.name = target_name
 
-    oqpy_program = program_conversion_context.get_oqpy_program()
+    oqpy_program = aq_context.get_oqpy_program()
     if is_value_name_used or value.init_expression is None:
         # Directly assign the value to the target.
         # For example:
@@ -91,7 +94,7 @@ def assign_stmt(target_name: str, value: Any) -> Any:
         oqpy_program.set(target, value)
     elif (
         target.name not in oqpy_program.declared_vars
-        and program_conversion_context.at_function_root_scope
+        and aq_context.at_function_root_scope
     ):
         # Explicitly declare and initialize the variable at the root scope.
         # For example:

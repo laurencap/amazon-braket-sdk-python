@@ -63,7 +63,6 @@ from braket.experimental.autoqasm.converters import (
     assignments,
     break_statements,
     comparisons,
-    return_statements,
 )
 
 
@@ -144,7 +143,6 @@ class PyToOqpy(transpiler.PyToPy):
         # dealing with the extra loop increment operation that the for
         # canonicalization creates.
         node = continue_statements.transform(node, ctx)
-        node = return_statements.transform(node, ctx)
         node = assignments.transform(node, ctx)
         node = lists.transform(node, ctx)
         node = slices.transform(node, ctx)
