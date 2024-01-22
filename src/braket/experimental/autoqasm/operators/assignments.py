@@ -52,7 +52,12 @@ def assign_stmt(target_name: str, value: Any) -> Any:
 
     if target_name == constants.RETVAL_VARIABLE_NAME:
         if not aq_context.subroutines_processing:
-            aq_context.register_parameter(value.name, float, "output")
+            # if not isinstance(value, (tuple, list)):
+            # import ipdb; ipdb.set_trace()
+            aq_context.register_parameter(target_name, float, "output")
+            # else:
+            #     for param in value:
+            #         aq_context.register_parameter(param.name, float, "output")
 
         # AutoGraph transpiles return statements like
         #    return <return_value>
@@ -67,7 +72,7 @@ def assign_stmt(target_name: str, value: Any) -> Any:
             # Return it directly without wrapping it or declaring a new variable.
             return value
 
-        if aq_context.subroutines_processing and isinstance(value, list):
+        if aq_context.subroutines_processing and isinstance(value, (list, tuple)):
             raise errors.UnsupportedSubroutineReturnType(
                 "Subroutine returns an array or list, which is not allowed."
             )

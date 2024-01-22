@@ -37,6 +37,7 @@ from braket.experimental.autoqasm.autograph.converters import (
     functions,
     lists,
     logical_expressions,
+    return_statements,
     slices,
     variables,
 )
@@ -143,6 +144,8 @@ class PyToOqpy(transpiler.PyToPy):
         # dealing with the extra loop increment operation that the for
         # canonicalization creates.
         node = continue_statements.transform(node, ctx)
+        # TODO laurecap is it better to grab main returns and treat them separately?
+        node = return_statements.transform(node, ctx)
         node = assignments.transform(node, ctx)
         node = lists.transform(node, ctx)
         node = slices.transform(node, ctx)
